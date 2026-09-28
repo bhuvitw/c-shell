@@ -87,6 +87,38 @@ Process Identification
 > Function: pid_t getppid (void) -> gets parent id 
 > Function: pid_t gettid (void) -> gets thread id
 
+strtok()
+
+chdir()
+
+```c
+int chdir(const char *path);
+int fchdir(int fd);
+```
+
+> chdir() changes the current working directory of the calling process to the directory specified in path.
+
+> fchdir() is identical to chdir(); the only difference is that the directory is given as an open file descriptor.
+
+> return: 0 (success), -1(error)
+
+getcwd()
+
+```c
+char *getcwd(size_t size;
+char buf[size], size_t size);
+char *get_current_dir_name(void);
+```
+
+> The getcwd() function copies an absolute pathname of the current working directory to the array pointed to by buf, which is of length size.
+
+> return: pointer to pathname(string)(success), NULL(error)
+
+
+
+
+
+
 
 
 
