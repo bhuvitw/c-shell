@@ -114,6 +114,40 @@ char *get_current_dir_name(void);
 
 > return: pointer to pathname(string)(success), NULL(error)
 
+strcmp()
+
+```c
+int strcmp(const char *s1, const char *s2);
+```
+> return: 0(equal), <0(s1 less than s2), >0(s1 greatere than s2)
+
+
+Your restructure is right: each built-in runs in the parent and then `continue`s, so nothing forks. Notes first, then the compiler errors.
+
+## Day 4 notes: built-ins vs external commands
+
+**External command**: a separate program file on disk (`/bin/ls`, `/usr/bin/grep`). The shell runs it with `fork()` + `execvp()`, so it lives in its own child process.
+
+**Built-in**: code inside the shell itself. The shell runs it in its own process, with no fork.
+
+**Why `cd` can't be `fork()` + `exec("cd")`**
+1. The current working directory is a per-process attribute, and the kernel keeps it. It isn't in your program's memory.
+2. `fork()` gives the child its own copy of that attribute. `chdir()` in the child changes only the child's copy.
+3. When the child exits, that copy is gone. The parent (the shell) never saw the change and is still in the old directory.
+4. So the process that must call `chdir()` is the shell itself. That is the definition of a built-in: a command that has to change the shell's own state.
+5. Side facts: `which cd` prints nothing on most systems, so there's no `cd` program for `execvp` to find. And even if a stub existed, it couldn't fix point 3.
+
+**Process model explanation**: parent and child are separate processes with separate kernel-tracked state after `fork()`. Nothing a child does to its own state propagates upward. (Memory is copy-on-write, so it looks separate too.)
+
+**Other built-ins follow the same rule**: `exit` must end the shell process itself. `pwd` could be external, but it's cheap to do in the shell. Later, `history` needs the shell's own memory, and `cd`-like state changes (like `export`) all need built-in treatment.
+
+**Implementation pattern**: parse, check `args[0]` with `strcmp` against each built-in, run it in the parent, then `continue` to skip the fork. Everything else goes to `fork` + `execvp`.
+
+**APIs**: `chdir(path)` returns 0 on success and -1 on failure. `getcwd(buf, size)` fills a `char` buffer. `strcmp` returns 0 on a match, and that's why you write `== 0`.
+
+**Things I got wrong or learned**: `==` on `char *` compares addresses, so use `strcmp`. `=` is assignment, not comparison. fork shares nothing writable after the copy.
+
+
 
 
 
