@@ -37,3 +37,64 @@ End of File: EOF
 Reading a line at time
 
 > So how can we get an entire line at once? fgets() to the rescue! For arguments, it takes a pointer to a char buffer to hold bytes, a maximum number of bytes to read, and a FILE* to read from. It returns NULL on end-of-file or error. fgets() is even nice enough to NUL-terminate the string when its done77.
+
+Running a command
+
+> Function: int **system** (const char *command) ¶
+
+Process Creation Process
+
+> A new processes is created when one of the functions posix_spawn, fork, _Fork, vfork, or pidfd_spawn is called. (The system and popen also create new processes internally.) Due to the name of the fork function, the act of creating a new process is sometimes called forking a process. Each new process (the child process or subprocess) is allocated a process ID, distinct from the process ID of the parent process.
+
+> After forking a child process, both the parent and child processes continue to execute normally. If you want your program to wait for a child process to finish executing before continuing, you must do this explicitly after the fork operation, by calling wait or waitpid (see Process Completion). These functions give you limited information about why the child terminated—for example, its exit status code.
+
+> Having several processes run the same program is only occasionally useful. But the child can execute another program using one of the exec functions; see Executing a File. The program that the process is executing is called its process image. Starting execution of a new program causes the process to forget all about its previous process image; when the new program exits, the process exits too, instead of returning to the previous process image.
+
+Creating a process
+
+> The fork function is the primitive for creating a process. It is declared in the header file unistd.h.
+
+> Function: pid_t **fork** (void)
+
+> what does it return? return child pid to parent pid, 0 to child pid, -1 if fork failed
+
+Executing a File 
+
+> This section describes the exec family of functions, for executing a file as a process image. You can use these functions to make a child process execute a new program after it has been forked.
+
+> The functions in this family differ in how you specify the arguments, but otherwise they all do the same thing. They are declared in the header file unistd.h.
+
+> Function: int **execv** (const char *filename, char *const argv[])
+
+BSD Process Wait Function
+
+> The GNU C Library also provides the wait3 function for compatibility with BSD. This function is declared in sys/wait.h. It is the predecessor to wait4, which is more flexible. wait3 is now obsolete.
+
+> Function: pid_t **wait3** (int *status-ptr, int options, struct rusage *usage)
+
+Process Identification 
+
+> Each process is named by a process ID number, a value of type pid_t. A process ID is allocated to each process when it is created. Process IDs are reused over time. The lifetime of a process ends when the parent process of the corresponding process waits on the process ID after the process has terminated. See Process Completion. (The parent process can arrange for such waiting to happen implicitly.) A process ID uniquely identifies a process only during the lifetime of the process. As a rule of thumb, this means that the process must still be running.
+
+> On Linux, threads created by pthread_create also receive a thread ID. The thread ID of the initial (main) thread is the same as the process ID of the entire process. Thread IDs for subsequently created threads are distinct. They are allocated from the same numbering space as process IDs. Process IDs and thread IDs are sometimes also referred to collectively as task IDs. In contrast to processes, threads are never waited for explicitly, so a thread ID becomes eligible for reuse as soon as a thread exits or is canceled. This is true even for joinable threads, not just detached threads. Threads are assigned to a thread group. In the GNU C Library implementation running on Linux, the process ID is the thread group ID of all threads in the process.
+
+> You can get the process ID of a process by calling getpid. The function getppid returns the process ID of the parent of the current process (this is also known as the parent process ID). Your program should include the header files unistd.h and sys/types.h to use these functions.
+
+> Data Type: **pid_t** 
+
+> Function: pid_t **getpid** (void) 
+
+> Function: pid_t getppid (void) -> gets parent id 
+> Function: pid_t gettid (void) -> gets thread id
+
+
+
+
+
+
+
+
+
+
+
+
