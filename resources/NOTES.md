@@ -147,6 +147,85 @@ Your restructure is right: each built-in runs in the parent and then `continue`s
 
 **Things I got wrong or learned**: `==` on `char *` compares addresses, so use `strcmp`. `=` is assignment, not comparison. fork shares nothing writable after the copy.
 
+Function Prototypes
+
+> You can notify the compiler in advance that you’ll be using a function of a certain type that has a certain parameter list.
+
+> If you don’t declare your function before you use it (either with a prototype or its definition), you’re performing something called an **implicit** declaration. This was allowed in the first C standard (C89), and that standard has rules about it, but is no longer allowed today. And there is no legitimate reason to rely on it in new code.
+
+```c
+int foo(void);  // This is the prototype!
+
+int main(){
+    i = foo();
+}
+
+int foo(void)  // This is the definition, just like the prototype!
+{
+    return 3490;
+}
+```
+
+Mutlifile Projects
+
+1. Includes and Function Prototypes
+```c
+// File foo.c
+
+#include <stdio.h>
+
+#include "bar.h"  // Include from current directory
+
+int main(void)
+{
+    printf("%d\n", add(2, 3));  // 5!
+}
+```
+dealing with repeated includes -> 
+```c
+#ifndef BAR_H   // If BAR_H isn't defined...
+#define BAR_H   // Define it (with no particular value)
+
+// File bar.h
+
+int add(int, int);
+
+#endif          // End of the #ifndef BAR_H
+````
+```c
+// File bar.c
+
+int add(int x, int y)
+{
+    return x + y;
+}
+```
+```bash
+gcc -o foo foo.c bar.c
+```
+
+4. Comipling with Object files
+
+> Let’s say you had a thousand C files. You could compile them all to object files to start (slowly) and then combine all those object files into an executable (fast).
+
+```bash
+gcc -c foo.c     # produces foo.o
+gcc -c bar.c     # produces bar.o
+```
+```bash
+gcc -o foo foo.o bar.o
+```
+
+Include 
+
+> In summary, used angle brackets (< and >) for the system includes, and use double quotes (") for your personal includes.
+
+Makefile
+
+
+
+
+
 
 
 

@@ -7,6 +7,9 @@
 #include <string.h>
 #include <limits.h>
 
+#include "BUILTIN_H.h"
+#include "PARSER_H.h"
+
 int main(){ 
     char s[1024]; 
     while(1){
@@ -26,46 +29,10 @@ int main(){
 
         if(i == 0) continue; 
 
+        char* args[513];
+        parser(s, args);
         
-        char *token; 
-
-        token = strtok(s, " "); 
-        char *args[513]; 
-
-        int j = 0;
-        args[j] = token; 
-        while(token != NULL) {
-            j++; 
-            token = strtok(NULL, " "); 
-            args[j] = token; 
-        }
-        
-        if(strcmp(args[0],"cd") == 0) {
-            // printf(args[1]); 
-            if(args[1] == NULL){
-                chdir("/");
-            }else{
-                int res = chdir(args[1]); 
-                if(res == -1){
-                    printf("cd: %s: No such file or directory\n", args[1]); 
-                }
-            }
-            continue; 
-        }
-
-        if(strcmp(args[0], "pwd") == 0) {
-            char cwd[PATH_MAX];
-            if(getcwd(cwd, PATH_MAX) != NULL) {
-                printf("%s\n", cwd);
-            }else{
-                printf("error\n");
-            }
-            continue;
-        }
-
-        if(strcmp(args[0], "exit") == 0){
-            exit(0); 
-        }
+        if(builtin(args) == 1) continue; 
         
         pid_t pid = fork(); 
 
