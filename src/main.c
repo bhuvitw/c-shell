@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
+#include <fcntl.h>
 
 #include "BUILTIN_H.h"
 #include "PARSER_H.h"
@@ -41,7 +42,40 @@ int main(){
             exit(1); 
         } else if (pid == 0){
             // child process
-            execvp(args[0], args); 
+            char* newargs[513]; 
+
+            i = 0;
+            while(args[i] != NULL && strcmp(args[i], ">") != 0 && strcmp(args[i], ">>") != 0){
+                newargs[i] = args[i]; 
+                i++; 
+            }
+            newargs[i] = NULL; 
+            
+
+            if(args[i]!=NULL) {
+                if(strcmp(args[i], ">") == 0){
+                    int fd = open(args[i+1], O_WRONLY | O_CREAT | O_TRUNC,  0644);
+                    if(fd < 0){
+                        perror("open");
+                        exit(1); 
+                    }
+                    dup2(fd, 1); 
+                    close(fd); 
+                }else if(strcmp(args[i], ">>") == 0){
+                    int fd = open(args[i+1], O_WRONLY | O_CREAT | O_APPEND,  0644);
+                    if(fd < 0){
+                        perror("open");
+                        exit(1); 
+                    }
+                    dup2(fd, 1); 
+                    close(fd);
+                }else if(strcmp(args[i+1+1], "2>") == 0){
+                    
+                }
+            }
+            
+
+            execvp(newargs[0], newargs); 
             
             exit(1); 
         } else {

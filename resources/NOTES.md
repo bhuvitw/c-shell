@@ -222,6 +222,91 @@ Include
 
 Makefile
 
+Stream Level I/O
+
+```text
+why use it? 
+•For reading binary files in large chunks.
+• For reading an entire file into core before parsing it.
+• To perform operations other than data transfer, which can only be done with a descriptor. (You can use fileno to get the descriptor corresponding to a stream.)
+• To pass descriptors to a child process. (The child can create its own stream to use a
+descriptor that it inherits, but cannot inherit a stream directly.)
+```
+
+Opening and closing Files
+
+> open, create -> fctnl.h
+> close -> unistd.h
+
+```c
+int open (const char *filename, int flags[, mode_t mode])
+```
+FLAGS in open
+```text
+O_CREAT: if pathname doesn't exist it creates new file -> mode_t mode set the permision of the file 
+O_WRONLY: it'll give permissions to write
+O_APPEND: it appends the file, file offset set to lseek(2)
+O_TRUNC: it will truncate the length to 0 if(O_WRONLY & O_RDWR) is allowd 
+```
+
+```c
+int creat (const char *filename, mode_t mode)
+```
+```text
+This function is obsolete. The call:
+    creat (filename, mode)
+is equivalent to:
+    open (filename, O_WRONLY | O_CREAT | O_TRUNC, mode)
+```
+
+```c
+int close (int filedes)
+```
+
+read, write, and lseek
+
+```c
+ssize_t //[Data Type]
+```
+> This data type is used to represent the sizes of blocks that can be read or written in a single operation. It is similar to size_t, but must be a signed type.
+
+```c
+ssize_t read (int filedes, void *buffer, size_t size) 
+```
+```c
+ssize_t write (int filedes, const void *buffer, size_t size)
+```
+```c
+off_t lseek (int filedes, off_t offset, int whence)
+```
+
+Duplicate descriptor
+
+> You can duplicate a file descriptor, or allocate another file descriptor that refers to the same open file as the original. Duplicate descriptors share one file position and one set of file status flags (see Section 13.15 [File Status Flags], page 405), but each has its own set of file descriptor flags (see Section 13.14 [File Descriptor Flags], page 404).
+
+```c
+int dup (int old) [Function]
+```
+>This function copies descriptor old to the first available descriptor number (the first number not currently open). It is equivalent to fcntl (old, F_DUPFD, 0).
+```c
+int dup2 (int old, int new) [Function]
+```
+> This function copies the descriptor old to descriptor number new. If old is an invalid descriptor, then dup2 does nothing; it does not close new. Otherwise, the new duplicate of old replaces any previous meaning of descriptor new, as if new were closed first. If old and new are different numbers, and old is a valid descriptor number, then dup2 is equivalent to:
+```c
+close (new);
+fcntl (old, F_DUPFD, new)
+```
+> However, dup2 does this atomically; there is no instant in the middle of calling dup2 at which new is closed and not yet a duplicate of old.
+
+File Descriptor
+
+> a file descriptor is a small non-negative integer that a process uses to refer to an open file (or pipe, or socket, or terminal). The kernel keeps a table, per-process, mapping each of these integers to an actual open-file entry. The integer itself has no meaning outside that process — fd 3 in your shell and fd 3 in ls are completely unrelated open files
+
+```text
+fd 0 = stdin
+fd 1 = stdout
+fd 2 = stderr
+```
 
 
 
