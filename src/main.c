@@ -45,37 +45,70 @@ int main(){
             char* newargs[513]; 
 
             i = 0;
-            while(args[i] != NULL && strcmp(args[i], ">") != 0 && strcmp(args[i], ">>") != 0){
+            while(args[i] != NULL && strcmp(args[i], ">") != 0 && strcmp(args[i], ">>") != 0 && strcmp(args[i], "2>") != 0){
                 newargs[i] = args[i]; 
                 i++; 
             }
             newargs[i] = NULL; 
-            
 
-            if(args[i]!=NULL) {
-                if(strcmp(args[i], ">") == 0){
-                    int fd = open(args[i+1], O_WRONLY | O_CREAT | O_TRUNC,  0644);
-                    if(fd < 0){
-                        perror("open");
-                        exit(1); 
-                    }
-                    dup2(fd, 1); 
-                    close(fd); 
-                }else if(strcmp(args[i], ">>") == 0){
-                    int fd = open(args[i+1], O_WRONLY | O_CREAT | O_APPEND,  0644);
-                    if(fd < 0){
-                        perror("open");
-                        exit(1); 
-                    }
-                    dup2(fd, 1); 
-                    close(fd);
-                }else if(strcmp(args[i+1+1], "2>") == 0){
-                    
+            char* appendFilePath = NULL;
+            char* truncateFilePath = NULL;
+            char* errorFilePath = NULL; 
+            int isAppend = 0;
+            int isTrunc = 0;
+            int isError = 0;
+
+            
+            while(args[i] != NULL) {
+                if(strcmp(args[i], ">") == 0) {
+                    truncateFilePath = args[i+1]; 
+                    isTrunc = 1;
                 }
+                if(strcmp(args[i], ">>") == 0) {
+                    appendFilePath = args[i+1]; 
+                    isAppend = 1;
+                }
+                if(strcmp(args[i], "2>") == 0) {
+                    errorFilePath = args[i+1]; 
+                    isError = 1; 
+                }
+                i++;
+            }
+
+            if(isAppend){
+                int fd = open(appendFilePath, O_WRONLY | O_CREAT | O_APPEND, 0644);
+                if(fd < 0){
+                    perror("open");
+                    exit(1);
+                }
+                dup2(fd, 1); 
+                close(fd); 
+            }
+
+            if(isTrunc){
+                int fd = open(truncateFilePath, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                if(fd < 0){
+                    perror("open");
+                    exit(1);
+                }
+                dup2(fd, 1); 
+                close(fd); 
+            }
+
+            if(isError){
+                int fd = open(errorFilePath, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                if(fd < 0){
+                    perror("open");
+                    exit(1);
+                }
+                dup2(fd, 2); 
+                close(fd); 
             }
             
 
-            execvp(newargs[0], newargs); 
+            if(execvp(newargs[0], newargs) == -1){
+                perror(newargs[0]);
+            }; 
             
             exit(1); 
         } else {
