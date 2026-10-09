@@ -34,7 +34,63 @@ int main(){
         parser(s, args);
         
         if(builtin(args) == 1) continue; 
-        
+
+        int p = 0;
+        while(args[p] != NULL && strcmp(args[p], "|") != 0) {
+            p++; 
+        }
+        if(args[p] != NULL) {
+
+            if(p == 0 || args[p+1]== NULL){
+                fprintf(stderr, "csh: syntax error near |\n");
+                continue; 
+            }
+            args[p] = NULL;
+            char **right = &args[p+1];
+            int pipefd[2]; 
+
+            if(pipe(pipefd)<1){
+                perror("pipe");
+            }; 
+            pid_t pid1 = fork();
+            
+            if(pid1 < 0){
+                // fork failed
+                exit(1); 
+            }
+            else if(pid1 == 0){
+                dup2(pipefd[1], 1); 
+                close(pipefd[0]);
+                close(pipefd[1]);
+                if(execvp(args[0], args)<0){
+                    perror("execvp");
+                }
+                exit(1); 
+            }
+
+            pid_t pid2 = fork(); 
+            if(pid2 < 0){
+                // fork failed
+                exit(1); 
+            }
+            else if(pid2 == 0){
+                dup2(pipefd[0],0);
+                close(pipefd[1]);
+                close(pipefd[0]);
+                if(execvp(right[0], right) < 0){
+                    perror("execvp"); 
+                }
+                exit(1);
+            } 
+
+            close(pipefd[0]);
+            close(pipefd[1]);
+            waitpid(pid1, NULL, 0);
+            waitpid(pid2, NULL, 0);
+            continue;
+        }
+
+
         pid_t pid = fork(); 
 
         if(pid < 0){
