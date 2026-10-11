@@ -1,16 +1,26 @@
-# ./bin/main: ./src/main.c ./src/builtin.c
-# 	gcc -Wall -Wextra ./src/main.c ./src/builtin.c ./src/parser.c -o ./bin/main
+CC = gcc
+CFLAGS = -Wall -Iinclude
 
+SRC_DIR = src
+OBJ_DIR = obj
 
-./bin/main: ./bin/main.o ./bin/parser.o ./bin/builtin.o
-	gcc -Wall -Wextra ./bin/main.o ./bin/parser.o ./bin/builtin.o -o ./bin/main
-	
+SRCS = $(wildcard $(SRC_DIR)/*.c)
+OBJS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 
-./bin/parser.o: ./src/parser.c
-	gcc -Wall -Wextra -c ./src/parser.c -o ./bin/parser.o
+TARGET = csh
 
-./bin/builtin.o: ./src/builtin.c
-	gcc -Wall -Wextra -c ./src/builtin.c -o ./bin/builtin.o
+all: $(TARGET)
 
-./bin/main.o: ./src/main.c
-	gcc -Wall -Wextra -c ./src/main.c -o ./bin/main.o
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $^
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
+
+clean:
+	rm -rf $(OBJ_DIR) $(TARGET)
+
+.PHONY: all clean

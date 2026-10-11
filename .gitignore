@@ -1,2 +1,29 @@
 bin/
 test/
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.o
+*.obj
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.a
+*.lib
+
+# Executables
+csh
+*.exe
+*.out
+*.app
+
+# IDEs and OS files
+.vscode/
+.vs/
+.DS_Store

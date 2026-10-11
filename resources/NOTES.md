@@ -308,7 +308,49 @@ fd 1 = stdout
 fd 2 = stderr
 ```
 
+Pipe -> <unistd.h>
 
+> Pipes  and  FIFOs  (also known as named pipes) provide a unidirectional interprocess communication channel.  A pipe has a read end and a  write end.  Data written to the write end of a pipe can be read from the read end of the pipe.
+
+> A  pipe  is created using pipe(2), which creates a new pipe and returns two file descriptors, one referring to the read end of  the  pipe,  the other referring to the write end.  Pipes can be used to create a communication channel between related processes; see pipe(2) for an example.
+
+```c
+int pipe(int pipefd[2]);
+```
+```c
+int pipe2(int pipefd[2], int flags);
+```
+return -> pipefd[0] -> read end of the file 
+       -> pipefd[1] -> write end of the file
+
+return value: 
+> On success, zero is returned.  On error, -1 is returned, errno  is  set to indicate the error, and pipefd is left unchanged.
+
+
+```text
+Your experiment, in plain steps
+
+Child (the writer):
+
+Close the read end.
+write() a string to the write end. The first argument is the fd number, not a path, as we covered.
+Close the write end.
+Exit.
+
+Parent (the reader):
+
+Close the write end.
+read() in a loop until it returns 0, printing what it gets.
+Close the read end.
+wait() for the child.
+
+Then break it on purpose: delete the parent’s close(write end) and run it. Predict first: will it hang? Count the open write ends.
+```
+
+WNOHANG
+>  return immediately if no child has exited.
+
+>if WNOHANG was specified and one or more child(ren) speci‐fied  by pid exist, but have not yet changed state, then 0 is returned. On failure, -1 is returned.
 
 
 
