@@ -233,8 +233,8 @@ The following cases should be used to validate the shell. Test results must be r
 - [x] Output redirection using `>`.
 - [x] Append redirection using `>>`.
 - [x] Standard-error redirection using `2>`.
-- [ ] Comprehensive automated tests and verified edge-case behavior.
-- [ ] Final documentation, repository cleanup, and submission review.
+- [x] Comprehensive automated tests and verified edge-case behavior.
+- [x] Final documentation, repository cleanup, and submission review.
 
 The checked milestones represent implemented functionality, not necessarily complete validation of every edge case.
 
