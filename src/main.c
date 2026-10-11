@@ -13,6 +13,7 @@
 
 int main(){ 
     char s[1024]; 
+    
     while(1){
         int bg_status;
         pid_t bg_pid; 
