@@ -7,13 +7,15 @@
 #include <string.h>
 #include <limits.h>
 #include <fcntl.h>
+#include <signal.h>
 
 #include "BUILTIN_H.h"
 #include "PARSER_H.h"
 
 int main(){ 
+    signal(SIGINT, SIG_IGN); 
+
     char s[1024]; 
-    
     while(1){
         int bg_status;
         pid_t bg_pid; 
@@ -78,6 +80,8 @@ int main(){
                 exit(1); 
             }
             else if(pid1 == 0){
+                if (!is_bg) signal(SIGINT, SIG_DFL);
+
                 dup2(pipefd[1], 1); 
                 close(pipefd[0]);
                 close(pipefd[1]);
@@ -93,6 +97,8 @@ int main(){
                 exit(1); 
             }
             else if(pid2 == 0){
+                if (!is_bg) signal(SIGINT, SIG_DFL);
+
                 dup2(pipefd[0],0);
                 close(pipefd[1]);
                 close(pipefd[0]);
@@ -106,8 +112,14 @@ int main(){
             close(pipefd[1]);
 
             if(!is_bg) {
+                int status1, status2;
                 waitpid(pid1, NULL, 0);
                 waitpid(pid2, NULL, 0);
+
+                if ((WIFSIGNALED(status1) && WTERMSIG(status1) == SIGINT) || 
+                    (WIFSIGNALED(status2) && WTERMSIG(status2) == SIGINT)) {
+                    printf("\n");
+                }
             } else {
                 printf("[Background pipe started] %d %d\n", pid1, pid2); 
             }
@@ -121,7 +133,8 @@ int main(){
             // fork failed
             exit(1); 
         } else if (pid == 0){
-            // child process
+            if (!is_bg) signal(SIGINT, SIG_DFL);
+
             char* newargs[513]; 
 
             i = 0;
@@ -195,6 +208,10 @@ int main(){
             if(!is_bg){
                 int status; 
                 waitpid(pid, &status, 0);
+
+                if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT) {
+                    printf("\n");
+                }
             } else {
                 printf("[Background process started] %d\n", pid);
             }
