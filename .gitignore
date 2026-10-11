@@ -1,12 +1,28 @@
 bin/
 test/
 
+# Compiled binaries and object files
+obj/
+*.o
+*.obj
+csh
+
+# Test outputs and temporary files
+*.txt
+!CMakeLists.txt
+!README.md
+!resources/
+
+# OS and Editor generated files
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
+
 # Prerequisites
 *.d
 
-# Compiled Object files
-*.o
-*.obj
 
 # Compiled Dynamic libraries
 *.so
@@ -22,8 +38,3 @@ csh
 *.exe
 *.out
 *.app
-
-# IDEs and OS files
-.vscode/
-.vs/
-.DS_Store
