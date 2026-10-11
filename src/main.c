@@ -14,6 +14,12 @@
 int main(){ 
     char s[1024]; 
     while(1){
+        int bg_status;
+        pid_t bg_pid; 
+        while((bg_pid = waitpid(-1, &bg_status, WNOHANG)) > 0){
+            printf("[Process %d done]\n", bg_pid);
+        }
+
         printf("csh> ");
 
         if(fgets(s, sizeof s, stdin) == NULL) exit(0);
@@ -35,10 +41,22 @@ int main(){
         
         if(builtin(args) == 1) continue; 
 
+        int is_bg = 0; 
+        int arg_count = 0;
+        while( args[arg_count] != NULL){
+            arg_count++ ;
+        }
+
+        if(arg_count > 0 && strcmp(args[arg_count - 1], "&") == 0) {
+            is_bg = 1; 
+            args[arg_count - 1] = NULL; 
+        }
+
         int p = 0;
         while(args[p] != NULL && strcmp(args[p], "|") != 0) {
             p++; 
         }
+
         if(args[p] != NULL) {
 
             if(p == 0 || args[p+1]== NULL){
@@ -85,8 +103,13 @@ int main(){
 
             close(pipefd[0]);
             close(pipefd[1]);
-            waitpid(pid1, NULL, 0);
-            waitpid(pid2, NULL, 0);
+
+            if(!is_bg) {
+                waitpid(pid1, NULL, 0);
+                waitpid(pid2, NULL, 0);
+            } else {
+                printf("[Background pipe started] %d %d\n", pid1, pid2); 
+            }
             continue;
         }
 
@@ -168,8 +191,13 @@ int main(){
             
             exit(1); 
         } else {
-            int status; 
-            waitpid(pid, &status, 0);
+            if(!is_bg){
+                int status; 
+                waitpid(pid, &status, 0);
+            } else {
+                printf("[Background process started] %d\n", pid);
+            }
+            
         }
     }
 }
