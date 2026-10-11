@@ -85,17 +85,23 @@ int main(){
 
                 if(pipe(pipefd)<1){
                     perror("pipe");
+                    cmd = strtok(NULL, ";");
+                    continue; 
                 }; 
                 pid_t pid1 = fork();
                 
                 if(pid1 < 0){
-                    // fork failed
-                    exit(1); 
+                    perror("fork");
+                    cmd = strtok(NULL, ";");
+                    continue; 
                 }
                 else if(pid1 == 0){
                     if (!is_bg) signal(SIGINT, SIG_DFL);
 
-                    dup2(pipefd[1], 1); 
+                    if (dup2(pipefd[1], 1) < 0) {
+                        perror("dup2");
+                        exit(1); 
+                    }
                     close(pipefd[0]);
                     close(pipefd[1]);
                     if(execvp(args[0], args)<0){
@@ -106,13 +112,17 @@ int main(){
 
                 pid_t pid2 = fork(); 
                 if(pid2 < 0){
-                    // fork failed
-                    exit(1); 
+                    perror("fork");
+                    cmd = strtok(NULL, ";");
+                    continue; 
                 }
                 else if(pid2 == 0){
                     if (!is_bg) signal(SIGINT, SIG_DFL);
 
-                    dup2(pipefd[0],0);
+                    if (dup2(pipefd[0],0) < 0) {
+                        perror("dup2");
+                        exit(1); 
+                    }
                     close(pipefd[1]);
                     close(pipefd[0]);
                     if(execvp(right[0], right) < 0){
@@ -144,8 +154,9 @@ int main(){
             pid_t pid = fork(); 
 
             if(pid < 0){
-                // fork failed
-                exit(1); 
+                perror("fork");
+                cmd = strtok(NULL, ";");
+                continue; 
             } else if (pid == 0){
                 if (!is_bg) signal(SIGINT, SIG_DFL);
 
@@ -188,7 +199,10 @@ int main(){
                         perror("open");
                         exit(1);
                     }
-                    dup2(fd, 1); 
+                    if(dup2(fd, 1) < 0) {
+                        perror("dup2");
+                        exit(1); 
+                    }
                     close(fd); 
                 }
 
@@ -198,7 +212,10 @@ int main(){
                         perror("open");
                         exit(1);
                     }
-                    dup2(fd, 1); 
+                    if (dup2(fd, 1) < 0) {
+                        perror("dup2");
+                        exit(1); 
+                    } 
                     close(fd); 
                 }
 
@@ -208,7 +225,10 @@ int main(){
                         perror("open");
                         exit(1);
                     }
-                    dup2(fd, 2); 
+                    if(dup2(fd, 2) < 0) {
+                        perror("dup2");
+                        exit(1); 
+                    } 
                     close(fd); 
                 }
                 
