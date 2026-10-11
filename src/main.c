@@ -83,7 +83,7 @@ int main(){
                 char **right = &args[p+1];
                 int pipefd[2]; 
 
-                if(pipe(pipefd)<1){
+                if(pipe(pipefd)<0){
                     perror("pipe");
                     cmd = strtok(NULL, ";");
                     continue; 
