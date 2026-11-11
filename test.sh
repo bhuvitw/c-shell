@@ -40,6 +40,12 @@ run_test "Built-in: pwd" "pwd" "/"
 run_test "External: echo" "echo test_string" "test_string"
 run_test "Sequential execution" "echo a; echo b" "b"
 run_test "Pipeline" "echo 'hello world' | grep world" "hello world"
+run_test "No-space pipe" 'echo hello|tr a-z A-Z' "HELLO"
+run_test "No-space redirect" 'echo zzz>f.txt; wc -c < f.txt' "4"
+run_test "No-space background" 'sleep 1&' "started"
+run_test "Operators in quotes stay literal" 'echo "a|b"' "a|b"
+run_test "stderr redirect" 'cat nosuch 2> e.txt; grep -c "No such" e.txt' "1"
+run_test "2 inside a word is not an operator" 'echo 12> f.txt; cat f.txt' "12"
 
 # Test Output Redirection
 printf 'echo redirect_test > out.txt\nexit\n' | "$CSH" > /dev/null 2>&1

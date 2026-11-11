@@ -16,6 +16,7 @@ int main(){
     signal(SIGINT, SIG_IGN); 
 
     char s[1024]; 
+    char spaced[3 * 1024 + 1]; 
     while(1){
         int bg_status;
         pid_t bg_pid; 
@@ -39,7 +40,9 @@ int main(){
 
         if(i == 0) continue; 
 
-        char *cmd = strtok(s, ";"); 
+        space_operators(s, spaced, sizeof spaced); 
+
+        char *cmd = strtok(spaced, ";"); 
 
         while (cmd != NULL) {
             char* args[513]; 
