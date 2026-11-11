@@ -8,22 +8,31 @@ make > /dev/null 2>&1
 PASS=0
 FAIL=0
 
+CSH="$(pwd)/csh"
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
+cd "$TMP"
+
 run_test() {
     local name="$1"
     local input="$2"
     local expected="$3"
     
     # Run the shell with the input command, capturing output
-    output=$(echo "$input; exit" | ./csh 2>&1)
-    
-    if echo "$output" | grep -q "$expected"; then
+    output=$(printf '%s\nexit\n' "$input" | timeout 5 "$CSH" 2>&1)
+    status=$?
+
+    if [ "$status" -eq 124 ]; then
+        echo "[FAIL] $name (HUNG)"
+        FAIL=$((FAIL+1))
+    elif echo "$output" | grep -qF -- "$expected"; then
         echo "[PASS] $name"
-        ((PASS++))
-    else
+        PASS=$((PASS+1))
+    else 
         echo "[FAIL] $name"
         echo "       Expected to find: $expected"
         echo "       Got: $output"
-        ((FAIL++))
+        FAIL=$((FAIL+1))
     fi
 }
 
@@ -33,16 +42,16 @@ run_test "Sequential execution" "echo a; echo b" "b"
 run_test "Pipeline" "echo 'hello world' | grep world" "hello world"
 
 # Test Output Redirection
-echo "echo redirect_test > out.txt; exit" | ./csh > /dev/null 2>&1
+printf 'echo redirect_test > out.txt\nexit\n' | "$CSH" > /dev/null 2>&1
 if grep -q "redirect_test" out.txt; then
     echo "[PASS] Output redirection (>)"
-    ((PASS++))
+    PASS=$((PASS+1))
 else
     echo "[FAIL] Output redirection (>)"
-    ((FAIL++))
+    FAIL=$((FAIL+1))
 fi
 
 # Cleanup
-rm -f out.txt error.txt output.txt
 echo "---"
 echo "Results: $PASS passed, $FAIL failed."
+[ "$FAIL" -eq 0 ]
