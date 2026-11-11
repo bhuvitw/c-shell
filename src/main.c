@@ -163,7 +163,7 @@ int main(){
                 char* newargs[513]; 
 
                 i = 0;
-                while(args[i] != NULL && strcmp(args[i], ">") != 0 && strcmp(args[i], ">>") != 0 && strcmp(args[i], "2>") != 0){
+                while(args[i] != NULL && strcmp(args[i], ">") != 0 && strcmp(args[i], ">>") != 0 && strcmp(args[i], "2>") != 0 && strcmp(args[i], "<") != 0) {
                     newargs[i] = args[i]; 
                     i++; 
                 }
@@ -172,9 +172,11 @@ int main(){
                 char* appendFilePath = NULL;
                 char* truncateFilePath = NULL;
                 char* errorFilePath = NULL; 
+                char* inputFilePath = NULL; 
                 int isAppend = 0;
                 int isTrunc = 0;
                 int isError = 0;
+                int isInput = 0; 
 
                 
                 while(args[i] != NULL) {
@@ -190,7 +192,24 @@ int main(){
                         errorFilePath = args[i+1]; 
                         isError = 1; 
                     }
+                    if(strcmp(args[i], "<") == 0) {
+                        inputFilePath = args[i+1]; 
+                        isInput = 1; 
+                    }
                     i++;
+                }
+
+                if(isInput) {
+                    int fd = open(inputFilePath, O_RDONLY); 
+                    if(fd < 0){
+                        perror("open"); 
+                        exit(1); 
+                    }
+                    if(dup2(fd, 0) < 0){
+                        perror("dup2");
+                        exit(1); 
+                    }
+                    close(fd); 
                 }
 
                 if(isAppend){
